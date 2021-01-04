@@ -7,7 +7,7 @@ const urlDetail =
   "https://site.na.wotvffbe.com/whatsnew/detail?group_id={id}&lang=en";
 
 require("dotenv").config();
-const urlDiscord = process.env.urlDiscord;
+const urlDiscord = process.argv[2];
 
 main = async () => {
   try {

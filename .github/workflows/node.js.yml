@@ -9,7 +9,7 @@ on:
   #pull_request:
   #  branches: [ master ]
   schedule:
-    - cron: "1 8 * * *"
+    - cron: "0 8 * * *"
 
 jobs:
   build:
@@ -30,4 +30,4 @@ jobs:
       #- run: npm run build --if-present
       #- run: npm test
       - run: npm install
-      - run: node index.js
+      - run: node index.js ${{ secrets.URL_DISCORD }}
