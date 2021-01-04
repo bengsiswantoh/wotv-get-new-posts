@@ -9,7 +9,12 @@ const urlDetail =
 require("dotenv").config();
 const urlDiscord = process.argv[2];
 
-main = async () => {
+const fs = require("fs");
+const dataFilename = "data.json";
+let rawData = fs.readFileSync(dataFilename);
+let dataFile = JSON.parse(rawData);
+
+main = async (dataFile) => {
   try {
     let url = urlList;
     const { data } = await axios({
@@ -21,27 +26,48 @@ main = async () => {
 
     const newItems = selector(".postList_item_label-new");
 
-    const titles = [];
+    const contents = [];
+    var found = false;
     newItems.each(async function (i, e) {
       const header = selector(this).parent().parent();
       const id = header.get(0).attribs["data-tab"];
 
       url = urlDetail.replace("{id}", id);
 
-      const info = header.find("p");
-      titles.push(info.text());
+      // save latest id
+      if (i === 0) {
+        dataFile.new_id = id;
+      }
+
+      // ignore if id already posted
+      if (dataFile.last_id == id) {
+        found = true;
+      }
+
+      // add if info new
+      if (!found) {
+        const info = header.find("p");
+        contents.push(info.text());
+      }
     });
 
-    await axios({
-      method: "post",
-      url: urlDiscord,
-      data: {
-        content: titles.join("\n"),
-      },
-    });
+    // if new content/s found
+    if (contents.length > 0) {
+      dataFile.last_id = dataFile.new_id;
+
+      await axios({
+        method: "post",
+        url: urlDiscord,
+        data: {
+          content: titles.join("\n"),
+        },
+      });
+
+      fs.writeFileSync(dataFilename, JSON.stringify(dataFile));
+    }
   } catch (err) {
     console.log(err);
   }
 };
 
-main();
+main(dataFile);

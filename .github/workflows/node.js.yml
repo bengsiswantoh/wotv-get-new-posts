@@ -26,8 +26,15 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      #- run: npm ci
-      #- run: npm run build --if-present
-      #- run: npm test
-      - run: npm install
-      - run: node index.js ${{ secrets.URL_DISCORD }}
+      - name: install libraries
+        run: npm install
+      - name: run code
+        run: node index.js ${{ secrets.URL_DISCORD }}
+      - name: Commit and push if changed
+        run: |
+          git add .
+          git diff
+          git config --global user.email "bengsiswantoh@gmail.com"
+          git config --global user.name "GitHub Action Bot"
+          git commit -m "Updated Data" -a || echo "No changes to commit"
+          git push
