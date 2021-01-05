@@ -21,20 +21,18 @@ main = async (dataFile) => {
       url,
     });
 
-    const selector = cheerio.load(data);
+    const selectorList = cheerio.load(data);
 
-    const newItems = selector(".postList_item_label-new");
+    const newItems = selectorList(".postList_item_label-new");
 
     const contents = [];
     var found = false;
-    newItems.each(async function (i, e) {
-      const header = selector(this).parent().parent();
+    newItems.each(async function (index, e) {
+      const header = selectorList(this).parent().parent();
       const id = header.get(0).attribs["data-tab"];
 
-      url = urlDetail.replace("{id}", id);
-
       // save latest id
-      if (i === 0) {
+      if (index === 0) {
         dataFile.new_id = id;
       }
 
@@ -47,12 +45,35 @@ main = async (dataFile) => {
       if (!found) {
         const info = header.find("p");
         contents.push(info.text());
+
+        // url = urlDetail.replace("{id}", id);
+
+        // try {
+        //   const { data } = await axios({
+        //     method: "get",
+        //     url,
+        //   });
+        //   console.log(response.data);
+
+        //   const selectorList = cheerio.load(data);
+
+        //   await axios({
+        //     method: "post",
+        //     url: urlDiscord,
+        //     data: {
+        //       content: response.data,
+        //     },
+        //   });
+        // } catch (err) {
+        //   console.log(err);
+        // }
       }
     });
 
     // if new content/s found
     if (contents.length > 0) {
       dataFile.last_id = dataFile.new_id;
+      delete dataFile.new_id;
 
       await axios({
         method: "post",
