@@ -56,7 +56,7 @@ main = async (dataFile) => {
         method: "post",
         url: urlDiscord,
         data: {
-          content: contents.join("\n"),
+          content: contents.join("\n\n"),
         },
       });
 
