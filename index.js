@@ -23,13 +23,12 @@ main = async (dataFile) => {
 
     const selectorList = cheerio.load(data);
 
-    const newItems = selectorList(".postList_item_label-new");
+    const items = selectorList("li");
 
     const contents = [];
     var found = false;
-    newItems.each(async function (index, e) {
-      const header = selectorList(this).parent().parent();
-      const id = header.get(0).attribs["data-tab"];
+    items.each(async function (index, e) {
+      const id = selectorList(this).get(0).attribs["data-tab"];
 
       // save latest id
       if (index === 0) {
@@ -43,30 +42,8 @@ main = async (dataFile) => {
 
       // add if info new
       if (!found) {
-        const info = header.find("p");
+        const info = selectorList(this).find("p");
         contents.push(info.text());
-
-        // url = urlDetail.replace("{id}", id);
-
-        // try {
-        //   const { data } = await axios({
-        //     method: "get",
-        //     url,
-        //   });
-        //   console.log(response.data);
-
-        //   const selectorList = cheerio.load(data);
-
-        //   await axios({
-        //     method: "post",
-        //     url: urlDiscord,
-        //     data: {
-        //       content: response.data,
-        //     },
-        //   });
-        // } catch (err) {
-        //   console.log(err);
-        // }
       }
     });
 
