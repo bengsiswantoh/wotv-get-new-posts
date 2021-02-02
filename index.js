@@ -43,7 +43,10 @@ main = async (dataFile) => {
       // add if info new
       if (!found) {
         const info = selectorList(this).find("p");
-        contents.push(info.text());
+
+        const url = urlDetail.replace("{id}", id);
+        const content = info.text() + "\n" + url;
+        contents.push(content);
       }
     });
 
@@ -52,13 +55,14 @@ main = async (dataFile) => {
       dataFile.last_id = dataFile.new_id;
       delete dataFile.new_id;
 
-      await axios({
-        method: "post",
-        url: urlDiscord,
-        data: {
-          content: contents.join("\n\n"),
-        },
-      });
+      console.log(contents.join("\n\n"));
+      // await axios({
+      //   method: "post",
+      //   url: urlDiscord,
+      //   data: {
+      //     content: contents.join("\n\n"),
+      //   },
+      // });
 
       fs.writeFileSync(dataFilename, JSON.stringify(dataFile));
     }
