@@ -55,14 +55,13 @@ main = async (dataFile) => {
       dataFile.last_id = dataFile.new_id;
       delete dataFile.new_id;
 
-      console.log(contents.join("\n\n"));
-      // await axios({
-      //   method: "post",
-      //   url: urlDiscord,
-      //   data: {
-      //     content: contents.join("\n\n"),
-      //   },
-      // });
+      await axios({
+        method: "post",
+        url: urlDiscord,
+        data: {
+          content: contents.join("\n\n"),
+        },
+      });
 
       fs.writeFileSync(dataFilename, JSON.stringify(dataFile));
     }
