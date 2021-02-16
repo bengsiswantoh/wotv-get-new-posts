@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 
+const debug = false;
 const maxLength = 2000;
 const urlList =
   "https://site.na.wotvffbe.com/whatsnew/list?page=1&category=info&platform=&lang=en";
@@ -19,10 +20,11 @@ const createContent = (contents) => {
   return content;
 };
 
-const sendMessage = async (contents, debug = false) => {
+const sendMessage = async (contents) => {
   const content = createContent(contents);
   if (debug) {
-    console.log(content.length);
+    console.log("===");
+    console.log(content);
   } else {
     await axios({
       method: "post",
