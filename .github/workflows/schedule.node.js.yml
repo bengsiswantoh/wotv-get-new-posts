@@ -5,7 +5,7 @@ name: schedule CI
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: '0 * * * *'
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
       - name: install libraries
         run: npm install
       - name: run code
-        run: node index.js ${{ secrets.URL_DISCORD }}
+        run: npm start ${{ secrets.URL_DISCORD }}
       - name: Commit and push if changed
         run: |
           git add .

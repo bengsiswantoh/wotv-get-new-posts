@@ -1,33 +1,33 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
+const axios = require('axios');
+const cheerio = require('cheerio');
 
 const debug = false;
 const maxLength = 2000;
 const urlList =
-  "https://site.na.wotvffbe.com/whatsnew/list?page=1&category=info&platform=&lang=en";
+  'https://site.na.wotvffbe.com/whatsnew/list?page=1&category=info&platform=&lang=en';
 const urlDetail =
-  "https://site.na.wotvffbe.com/whatsnew/detail?group_id={id}&lang=en";
+  'https://site.na.wotvffbe.com/whatsnew/detail?group_id={id}&lang=en';
 
 const urlDiscord = process.argv[2];
 
-const fs = require("fs");
-const dataFilename = "data.json";
+const fs = require('fs');
+const dataFilename = 'data.json';
 let rawData = fs.readFileSync(dataFilename);
 let dataFile = JSON.parse(rawData);
 
 const createContent = (contents) => {
-  const content = contents.join("\n\n");
+  const content = contents.join('\n\n');
   return content;
 };
 
 const sendMessage = async (contents) => {
   const content = createContent(contents);
   if (debug) {
-    console.log("===");
+    console.log('===');
     console.log(content);
   } else {
     await axios({
-      method: "post",
+      method: 'post',
       url: urlDiscord,
       data: {
         content,
@@ -40,18 +40,18 @@ const main = async (dataFile) => {
   try {
     let url = urlList;
     const { data } = await axios({
-      method: "get",
+      method: 'get',
       url,
     });
 
     const selectorList = cheerio.load(data);
 
-    const items = selectorList("li");
+    const items = selectorList('li');
 
     let contents = [];
     var found = false;
     items.each(async function (index, e) {
-      const id = selectorList(this).get(0).attribs["data-tab"];
+      const id = selectorList(this).get(0).attribs['data-tab'];
 
       // save latest id
       if (index === 0) {
@@ -65,10 +65,10 @@ const main = async (dataFile) => {
 
       // add if info new
       if (!found) {
-        const info = selectorList(this).find("p");
+        const info = selectorList(this).find('p');
 
-        const url = urlDetail.replace("{id}", id);
-        const newContent = info.text() + "\n" + url;
+        const url = urlDetail.replace('{id}', id);
+        const newContent = info.text() + '\n' + url;
         // const content = info.text();
         contents.push(newContent);
 
@@ -77,8 +77,7 @@ const main = async (dataFile) => {
           contents.pop();
           sendMessage(contents);
 
-          contents = [];
-          contents.push(newContent);
+          contents = [newContent];
         }
       }
     });
