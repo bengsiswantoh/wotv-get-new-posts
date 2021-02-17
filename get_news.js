@@ -96,9 +96,10 @@ const main = async (dataFile) => {
         const info = selector(this).find('p');
 
         const url = urlDetail.replace('{id}', id);
-        const details = await getDetails(url);
+        // const details = await getDetails(url);
 
-        const newContent = `${info.text()}\n${url}\n${details}`;
+        const newContent = `${info.text()}\n${url}`;
+        // const newContent = `${info.text()}\n${url}\n${details}`;
 
         contents.push(newContent);
 
