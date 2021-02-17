@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const debug = false;
+const debug = true;
 const maxLength = 2000;
 const urlRoot = 'https://site.na.wotvffbe.com';
 const urlList =
@@ -42,13 +42,22 @@ const getDetails = async (url) => {
     url,
   });
 
-  const selector = cheerio.load(data);
+  let selector = cheerio.load(data);
+  const articleBody = selector('.article_body').html();
+
+  selector = cheerio.load(articleBody);
   const images = selector('img');
 
   let result = '';
   images.each(async function (index, e) {
     const src = selector(this).get(0).attribs['src'];
     result = `${result}${urlRoot}${src}\n`;
+  });
+
+  const dives = selector('div');
+  dives.each(async function (index, e) {
+    const text = selector(this).text();
+    // console.log(text);
   });
 
   return result;
