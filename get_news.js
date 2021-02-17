@@ -94,17 +94,16 @@ const main = async (dataFile) => {
       }
     });
 
+    // looping content for detail and send to discord
     for (const content of contents) {
       const details = await getDetails(content.url);
       await sendMessage(content.message + details);
     }
 
-    // if new content/s found
+    // if new content/s found update data.json
     if (contents.length > 0) {
       dataFile.last_id = dataFile.new_id;
       delete dataFile.new_id;
-
-      // await sendMessage(contents);
 
       fs.writeFileSync(dataFilename, JSON.stringify(dataFile));
     }
