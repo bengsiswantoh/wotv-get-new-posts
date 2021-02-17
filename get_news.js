@@ -3,10 +3,10 @@ const cheerio = require('cheerio');
 
 const debug = false;
 const maxLength = 2000;
+const urlRoot = 'https://site.na.wotvffbe.com';
 const urlList =
-  'https://site.na.wotvffbe.com/whatsnew/list?page=1&category=info&platform=&lang=en';
-const urlDetail =
-  'https://site.na.wotvffbe.com/whatsnew/detail?group_id={id}&lang=en';
+  urlRoot + '/whatsnew/list?page=1&category=info&platform=&lang=en';
+const urlDetail = urlRoot + '/whatsnew/detail?group_id={id}&lang=en';
 
 const urlDiscord = process.argv[2];
 
@@ -36,6 +36,24 @@ const sendMessage = async (contents) => {
   }
 };
 
+const getDetails = async (url) => {
+  const { data } = await axios({
+    method: 'get',
+    url,
+  });
+
+  const selector = cheerio.load(data);
+  const images = selector('img');
+
+  let result = '';
+  images.each(async function (index, e) {
+    const src = selector(this).get(0).attribs['src'];
+    result = `${result}${urlRoot}${src}\n`;
+  });
+
+  return result;
+};
+
 const main = async (dataFile) => {
   try {
     let url = urlList;
@@ -44,14 +62,15 @@ const main = async (dataFile) => {
       url,
     });
 
-    const selectorList = cheerio.load(data);
+    const selector = cheerio.load(data);
 
-    const items = selectorList('li');
+    const items = selector('li');
 
     let contents = [];
     var found = false;
+
     items.each(async function (index, e) {
-      const id = selectorList(this).get(0).attribs['data-tab'];
+      const id = selector(this).get(0).attribs['data-tab'];
 
       // save latest id
       if (index === 0) {
@@ -65,17 +84,19 @@ const main = async (dataFile) => {
 
       // add if info new
       if (!found) {
-        const info = selectorList(this).find('p');
+        const info = selector(this).find('p');
 
         const url = urlDetail.replace('{id}', id);
-        const newContent = info.text() + '\n' + url;
-        // const content = info.text();
+        const details = await getDetails(url);
+
+        const newContent = `${info.text()}\n${url}\n${details}`;
+
         contents.push(newContent);
 
         let content = createContent(contents);
         if (content.length > maxLength) {
           contents.pop();
-          sendMessage(contents);
+          await sendMessage(contents);
 
           contents = [newContent];
         }
