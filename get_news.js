@@ -71,7 +71,7 @@ const main = async (dataFile) => {
     let contents = [];
     var found = false;
 
-    items.each(async function (index, e) {
+    items.each(function (index, e) {
       const id = selector(this).data('tab');
 
       // save latest id
