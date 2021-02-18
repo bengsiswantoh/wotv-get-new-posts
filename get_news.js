@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const debug = true;
+const debug = false;
 const maxLength = 2000;
 const urlRoot = 'https://site.na.wotvffbe.com';
 const urlList =
