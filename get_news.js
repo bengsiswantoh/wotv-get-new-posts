@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const debug = false;
+const debug = true;
 const maxLength = 2000;
 const urlRoot = 'https://site.na.wotvffbe.com';
 const urlList =
@@ -94,11 +94,22 @@ const main = async (dataFile) => {
       }
     });
 
+    let message = '';
     // looping content for detail and send to discord
     for (const content of contents) {
       const details = await getDetails(content.url);
-      await sendMessage(content.message + details);
+      // await sendMessage(content.message + details);
+      const newMessage = `${content.message}${details}`;
+      const tempMessage = `${message}${newMessage}`;
+      if (message.length > maxLength) {
+        sendMessage(message);
+        message = newMessage;
+      } else {
+        message = tempMessage;
+      }
     }
+
+    sendMessage(message);
 
     // if new content/s found update data.json
     if (contents.length > 0) {
