@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 const debug = false;
+const updateData = true;
 const maxLength = 2000;
 const urlRoot = 'https://site.na.wotvffbe.com';
 const urlList =
@@ -56,6 +57,19 @@ const getDetails = async (url) => {
   return result;
 };
 
+const checkMessageLength = (message, newMessage) => {
+  const tempMessage = `${message}${newMessage}`;
+
+  if (tempMessage.length > maxLength) {
+    sendMessage(message);
+    message = newMessage;
+  } else {
+    message = tempMessage;
+  }
+
+  return message;
+};
+
 const main = async (dataFile) => {
   try {
     let url = urlList;
@@ -68,9 +82,10 @@ const main = async (dataFile) => {
 
     const items = selector('li');
 
-    let contents = [];
+    let urls = [];
     var found = false;
 
+    let message = '';
     items.each(function (index, e) {
       const id = selector(this).data('tab');
 
@@ -87,36 +102,28 @@ const main = async (dataFile) => {
       // add if info new
       if (!found) {
         const info = selector(this).find('p');
-
         const url = urlDetail.replace('{id}', id);
-        const content = { url, message: `${info.text()}\n${url}\n` };
-        contents.push(content);
+
+        newMessage = `${info.text()}\n${url}\n\n`;
+        message = checkMessageLength(message, newMessage);
+
+        urls.push(url);
       }
     });
-
-    let message = '';
-    // looping content for detail and send to discord
-    for (const content of contents) {
-      const details = await getDetails(content.url);
-      // await sendMessage(content.message + details);
-      const newMessage = `${content.message}${details}`;
-      const tempMessage = `${message}${newMessage}`;
-      if (message.length > maxLength) {
-        sendMessage(message);
-        message = newMessage;
-      } else {
-        message = tempMessage;
-      }
-    }
-
     sendMessage(message);
 
     // if new content/s found update data.json
-    if (contents.length > 0) {
+    if (dataFile.last_id !== dataFile.new_id && updateData) {
       dataFile.last_id = dataFile.new_id;
       delete dataFile.new_id;
 
       fs.writeFileSync(dataFilename, JSON.stringify(dataFile));
+    }
+
+    // looping content for detail and send to discord
+    for (const url of urls) {
+      const details = await getDetails(url);
+      sendMessage(details);
     }
   } catch (err) {
     console.log(err);
