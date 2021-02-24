@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 
 const debug = false;
 const updateData = true;
+const maxImages = 4;
 const maxLength = 2000;
 const urlRoot = 'https://site.na.wotvffbe.com';
 const urlList =
@@ -17,6 +18,10 @@ let rawData = fs.readFileSync(dataFilename);
 let dataFile = JSON.parse(rawData);
 
 const sendMessage = async (content) => {
+  if (content.length === 0) {
+    return;
+  }
+
   if (debug) {
     console.log('===');
     console.log(content);
@@ -31,7 +36,7 @@ const sendMessage = async (content) => {
   }
 };
 
-const getDetails = async (url) => {
+const sendDetails = async (url) => {
   const { data } = await axios({
     method: 'get',
     url,
@@ -44,17 +49,19 @@ const getDetails = async (url) => {
   const images = selector('img');
 
   let result = '';
+  let imageCount = 1;
   images.each(async function (index, e) {
     const src = selector(this).attr('src');
-    result = `${result}${urlRoot}${src}\n`;
+
+    if (index % maxImages === 0) {
+      sendMessage(result);
+      result = `${urlRoot}${src}\n`;
+    } else {
+      result = `${result}${urlRoot}${src}\n`;
+    }
   });
 
-  // const dives = selector('div');
-  // dives.each(async function (index, e) {
-  //   const text = selector(this).text();
-  // });
-
-  return result;
+  sendMessage(result);
 };
 
 const checkMessageLength = (message, newMessage) => {
@@ -122,8 +129,7 @@ const main = async (dataFile) => {
 
     // looping content for detail and send to discord
     for (const url of urls) {
-      const details = await getDetails(url);
-      sendMessage(details);
+      await sendDetails(url);
     }
   } catch (err) {
     console.log(err);
