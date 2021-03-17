@@ -60,9 +60,9 @@ const sendDetails = async (url) => {
 
     if (index % maxImages === 0) {
       sendMessage(result);
-      result = `${urlRoot}${src}\n`;
+      result = `${rootURL}${src}\n`;
     } else {
-      result = `${result}${urlRoot}${src}\n`;
+      result = `${result}${rootURL}${src}\n`;
     }
   });
 
