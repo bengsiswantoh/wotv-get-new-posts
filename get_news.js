@@ -5,12 +5,15 @@ const debug = false;
 const updateData = true;
 const maxImages = 4;
 const maxLength = 2000;
-const urlRoot = 'https://site.na.wotvffbe.com';
-const urlList =
-  urlRoot + '/whatsnew/list?page=1&category=info&platform=&lang=en';
-const urlDetail = urlRoot + '/whatsnew/detail?group_id={id}&lang=en';
+const rootURL = 'https://site.na.wotvffbe.com';
+const listURL =
+  rootURL + '/whatsnew/list?page=1&category=info&platform=&lang=en';
+const detailURL = rootURL + '/whatsnew/detail?group_id={id}&lang=en';
 
-const urlDiscord = process.argv[2];
+const discordURLs = [];
+for (let i = 2; i < process.argv.length; i++) {
+  discordURLs.push(process.argv[i]);
+}
 
 const fs = require('fs');
 const dataFilename = 'data.json';
@@ -26,13 +29,15 @@ const sendMessage = async (content) => {
     console.log('===');
     console.log(content);
   } else {
-    await axios({
-      method: 'post',
-      url: urlDiscord,
-      data: {
-        content,
-      },
-    });
+    for (const discordURL of discordURLs) {
+      await axios({
+        method: 'post',
+        url: discordURL,
+        data: {
+          content,
+        },
+      });
+    }
   }
 };
 
@@ -79,7 +84,7 @@ const checkMessageLength = (message, newMessage) => {
 
 const main = async (dataFile) => {
   try {
-    let url = urlList;
+    let url = listURL;
     const { data } = await axios({
       method: 'get',
       url,
@@ -109,7 +114,7 @@ const main = async (dataFile) => {
       // add if info new
       if (!found) {
         const info = selector(this).find('p');
-        const url = urlDetail.replace('{id}', id);
+        const url = detailURL.replace('{id}', id);
 
         newMessage = `${info.text()}\n${url}\n\n`;
         message = checkMessageLength(message, newMessage);
